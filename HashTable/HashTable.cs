@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace HashTable
 {
-    public abstract class HashTable
+    public abstract class HashTable<TKey, TValue>
     {
-        public abstract void Insert(Item item);
-        public abstract Item Search(int key);
-        public abstract void Delete(int key);
+        public abstract void Insert(TValue item);
+        public abstract TValue Search(TKey key);
+        public abstract void Delete(TKey key);
     }
 }
