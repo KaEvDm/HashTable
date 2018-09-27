@@ -8,8 +8,8 @@ namespace HashTable
 {
     public class Item<TKey, TValue>
     {
-        TKey Key { get; }
-        TValue Value { get; }
+        public TKey Key { get; }
+        public TValue Value { get; }
 
         public Item(TKey key, TValue value)
         {

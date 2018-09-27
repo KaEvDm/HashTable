@@ -10,9 +10,31 @@ namespace HashTable
     {
         private Dictionary<int, List<Item<TKey, TValue>>> items;
 
+        public ClosedHashTable()
+        {
+            items = new Dictionary<int, List<Item<TKey, TValue>>>();
+        }
+
         public override void Add(Item<TKey, TValue> item)
         {
-            throw new NotImplementedException();
+            var hash = GetHash(item.Key);
+
+            if (items.ContainsKey(hash))
+            {
+                if (items[hash].SingleOrDefault(i => i.Key.Equals(item.Key)) != null)
+                {
+                    throw new ArgumentException($"Хеш-таблица уже содержит элемент с ключом {item.Key}. " +
+                        $"Ключ должен быть уникален.", nameof(item.Key));
+                }
+                else
+                {
+                    items[hash].Add(item);
+                }
+            }
+            else
+            {
+                items.Add(hash, new List<Item<TKey, TValue>>{ item });
+            }
         }
 
         public override TValue Search(TKey key)
