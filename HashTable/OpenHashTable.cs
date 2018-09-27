@@ -13,7 +13,7 @@ namespace HashTable
             throw new NotImplementedException();
         }
 
-        public override void Insert(TValue item)
+        public override void Add(TValue item)
         {
             throw new NotImplementedException();
         }

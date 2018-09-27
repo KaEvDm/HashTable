@@ -6,14 +6,11 @@ using System.Threading.Tasks;
 
 namespace HashTable
 {
-    public class ClosedHashTable<TKey, TValue> : HashTable<TKey, TValue>
+    public class ClosedHashTable<THash, TKey, TValue> : HashTable<THash, TKey, TValue>
     {
-        public override void Delete(TKey key)
-        {
-            throw new NotImplementedException();
-        }
+        private Dictionary<TKey, List<Item<TKey, TValue>>> keyValuePairs;
 
-        public override void Insert(TValue item)
+        public override void Add(Item<TKey, TValue> item)
         {
             throw new NotImplementedException();
         }
@@ -22,5 +19,14 @@ namespace HashTable
         {
             throw new NotImplementedException();
         }
+
+        public override void Delete(TKey key)
+        {
+            throw new NotImplementedException();
+        }
+
+        
+
+     
     }
 }
