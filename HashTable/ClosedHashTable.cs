@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace HashTable
 {
-    public class ClosedHashTable<THash, TKey, TValue> : HashTable<THash, TKey, TValue>
+    public sealed class ClosedHashTable<TKey, TValue> : HashTable<TKey, TValue>
     {
-        private Dictionary<TKey, List<Item<TKey, TValue>>> keyValuePairs;
+        private Dictionary<int, List<Item<TKey, TValue>>> items;
 
         public override void Add(Item<TKey, TValue> item)
         {
@@ -24,9 +24,5 @@ namespace HashTable
         {
             throw new NotImplementedException();
         }
-
-        
-
-     
     }
 }
