@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HashTable
 {
@@ -22,24 +20,23 @@ namespace HashTable
             if (items.ContainsKey(hash))
             {
                 if (items[hash].SingleOrDefault(i => i.Key.Equals(item.Key)) != null)
-                {
-                    throw new ArgumentException($"Хеш-таблица уже содержит элемент с ключом {item.Key}. " +
-                        $"Ключ должен быть уникален.", nameof(item.Key));
-                }
-                else
-                {
-                    items[hash].Add(item);
-                }
+                    throw new ArgumentException($"Хеш-таблица уже содержит элемент с ключом {item.Key}." +
+                                                " Ключ должен быть уникален.", nameof(item.Key));
+                else items[hash].Add(item);
             }
-            else
-            {
-                items.Add(hash, new List<Item<TKey, TValue>>{ item });
-            }
+            else items.Add(hash, new List<Item<TKey, TValue>> { item });
         }
 
         public override TValue Search(TKey key)
         {
-            throw new NotImplementedException();
+            var hash = GetHash(key);
+
+            if (!items.ContainsKey(hash)) return default(TValue);
+
+            var item = items[hash].SingleOrDefault(i => i.Key.Equals(key));
+
+            if (item != null) return item.Value;
+            else return default(TValue);
         }
 
         public override void Delete(TKey key)
