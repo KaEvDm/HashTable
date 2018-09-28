@@ -41,7 +41,19 @@ namespace HashTable
 
         public override void Delete(TKey key)
         {
-            throw new NotImplementedException();
+            var hash = GetHash(key);
+
+            if (items.ContainsKey(hash))
+            {
+                var item = items[hash].SingleOrDefault(i => i.Key.Equals(key));
+
+                if(item != null)
+                {
+                    items[hash].Remove(item);
+                }
+                else throw new ArgumentException($"Хеш-таблица не содержит элемент с ключом {key}.", nameof(key));
+            }
+            else throw new ArgumentException($"Хеш-таблица не содержит элемент с ключом {key}.", nameof(key));
         }
     }
 }
