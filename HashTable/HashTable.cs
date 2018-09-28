@@ -10,7 +10,7 @@ namespace HashTable
 
         public abstract void Add(Item<TKey, TValue> item);
         public abstract TValue Search(TKey key);
-        public abstract void Delete(TKey key);
+        public abstract bool Delete(TKey key);
 
         protected int GetHash(TKey key) => (key.GetHashCode() ^ SecretHashCode) % Size;
     }

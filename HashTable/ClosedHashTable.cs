@@ -16,7 +16,7 @@ namespace HashTable
             throw new NotImplementedException();
         }
 
-        public override void Delete(TKey key)
+        public override bool Delete(TKey key)
         {
             throw new NotImplementedException();
         }
