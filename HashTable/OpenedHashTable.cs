@@ -27,7 +27,7 @@ namespace HashTable
 
             if (items.ContainsKey(hash))
             {
-                if (items[hash].SingleOrDefault(i => i.Key.Equals(item.Key)).Equals(default(KeyValuePair<TKey, TValue>)))
+                if (!items[hash].SingleOrDefault(i => i.Key.Equals(item.Key)).Equals(default(KeyValuePair<TKey, TValue>)))
                 {
                     throw new ArgumentException($"Хеш-таблица уже содержит элемент с ключом {item.Key}." +
                         " Ключ должен быть уникален.", nameof(item.Key));

@@ -13,6 +13,7 @@ namespace HashTable
         public int Count { get; protected set; }
 
         public abstract void Add(KeyValuePair<TKey, TValue> item);
+        public void Add(TKey key, TValue value) => Add(new KeyValuePair<TKey, TValue>(key, value));
         public abstract TValue Search(TKey key);
         public abstract bool Delete(TKey key);
 
