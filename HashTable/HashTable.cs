@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace HashTable
 {
@@ -6,12 +7,21 @@ namespace HashTable
     {
         //SecretHashCode определяется как "KaEvDm".GetHashCode();
         private const int SecretHashCode = -1474368688;
-        private const int Size = 256;
 
-        public abstract void Add(Item<TKey, TValue> item);
+        public int Size { get; protected set; } = 256;
+        public int LoadFactor { get => Count/Size; }
+        public int Count { get; protected set; }
+
+        public abstract void Add(KeyValuePair<TKey, TValue> item);
         public abstract TValue Search(TKey key);
         public abstract bool Delete(TKey key);
 
         protected int GetHash(TKey key) => (key.GetHashCode() ^ SecretHashCode) % Size;
+
+        public TValue this[TKey key]
+        {
+            get => Search(key);
+            set => Add(new KeyValuePair<TKey, TValue>(key, value));
+        }
     }
 }

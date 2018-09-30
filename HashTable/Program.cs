@@ -8,7 +8,7 @@ namespace HashTable
     {
         static void Main(string[] args)
         {
-            var testTable = new OpenedHashTable<int, string>();    
+            var testTable = new OpenedHashTable<int, string>();
 
             //Assert.AreEqual(testTable.Search(5), "five");
             //Assert.AreEqual(testTable.Search(300), "three hundred");

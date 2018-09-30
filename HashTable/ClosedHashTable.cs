@@ -4,9 +4,10 @@ using System.Linq;
 
 namespace HashTable
 {
+    // Метод открытой адресации(закрытое хеширование)
     public sealed class ClosedHashTable<TKey, TValue> : HashTable<TKey, TValue>
     {
-        public override void Add(Item<TKey, TValue> item)
+        public override void Add(KeyValuePair<TKey, TValue> item)
         {
             throw new NotImplementedException();
         }
