@@ -10,37 +10,30 @@ namespace HashTable
         {
             var testTable = new OpenedHashTable<int, string>();
 
-            //Assert.AreEqual(testTable.Search(5), "five");
-            //Assert.AreEqual(testTable.Search(300), "three hundred");
-            //Assert.IsNull(testTable.Search(10));
+            testTable.Add(5, "five");
+            testTable.Add(300, "three hundred");
 
-            //Console.WriteLine(testTable.Search(300));
-            //Console.WriteLine(testTable.Search(5));
-            //Console.WriteLine(testTable.Search(10));
+            Assert.AreEqual(testTable[5], "five");
+            Assert.AreEqual(testTable[300], "three hundred");
+            Assert.IsNull(testTable[10]);
 
-            //try { testTable.Add(new Item<int, string>(5, "five")); }
-            //catch (ArgumentException e) { Console.WriteLine($"1 add 5: {e.Message}"); }
+            Console.WriteLine(testTable[300]);
+            Console.WriteLine(testTable[5]);
+            Console.WriteLine(testTable[10]);
 
-            //try { testTable.Delete(5); }
-            //catch (ArgumentException e) { Console.WriteLine($"2 del 5: {e.Message}"); }
+            try { testTable.Add(5, "five"); }
+            catch (ArgumentException e) { Console.WriteLine($"testTable.Add(5, \"five\"): {e.Message}"); }
 
-            //try { testTable.Delete(5); }
-            //catch (ArgumentException e) { Console.WriteLine($"3 del 5: {e.Message}"); }
+            testTable.Remove(300);
+            Assert.IsNull(testTable[300]);
 
-            //try { testTable.Delete(4); }
-            //catch (ArgumentException e) { Console.WriteLine($"4 del 4: {e.Message}"); }
+            testTable.Add(300, "three hundred");
 
-            //try { testTable.Delete(300); }
-            //catch (ArgumentException e) { Console.WriteLine($"5 del 300: {e.Message}"); }
+            Assert.AreEqual(testTable[300], "three hundred");
 
-            //try { Assert.IsNull(testTable.Search(300)); }
-            //catch (ArgumentException e) { Console.WriteLine($"6 srch 300: {e.Message}"); }
+            var classHashTable = new OpenedHashTable<String, String>();
 
-            //try { testTable.Add(new Item<int, string>(300, "three hundred")); }
-            //catch (ArgumentException e) { Console.WriteLine($"7 add 300: {e.Message}"); }
-
-            //try { Assert.AreEqual(testTable.Search(300), "three hundred"); }
-            //catch (ArgumentException e) { Console.WriteLine($"8 srch 300: {e.Message}"); }
+            classHashTable.Add(default(string), "dsfsdfsfds");
 
             Console.ReadKey();
         }

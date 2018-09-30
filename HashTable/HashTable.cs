@@ -5,24 +5,26 @@ namespace HashTable
 {
     public abstract class HashTable<TKey, TValue>
     {
-        //SecretHashCode определяется как "KaEvDm".GetHashCode();
-        private const int SecretHashCode = -1474368688;
+        private int SecretHashCode = "KaEvDm".GetHashCode();
 
-        public int Size { get; protected set; } = 256;
+        public int Size { get; protected set; }
         public int LoadFactor { get => Count/Size; }
-        public int Count { get; protected set; }
+        public virtual int Count { get; protected set; }
 
-        public abstract void Add(KeyValuePair<TKey, TValue> item);
-        public void Add(TKey key, TValue value) => Add(new KeyValuePair<TKey, TValue>(key, value));
-        public abstract TValue Search(TKey key);
-        public abstract bool Delete(TKey key);
+        public abstract void Add(TKey key, TValue value);
+        public abstract bool TryGetValue(TKey key, out TValue value);
+        public abstract bool Remove(TKey key);
 
         protected int GetHash(TKey key) => (key.GetHashCode() ^ SecretHashCode) % Size;
 
         public TValue this[TKey key]
         {
-            get => Search(key);
-            set => Add(new KeyValuePair<TKey, TValue>(key, value));
+            get
+            {
+                TryGetValue(key, out TValue value);
+                return value;
+            }
+            set => Add(key, value);
         }
     }
 }

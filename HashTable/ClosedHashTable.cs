@@ -7,17 +7,22 @@ namespace HashTable
     // Метод открытой адресации(закрытое хеширование)
     public sealed class ClosedHashTable<TKey, TValue> : HashTable<TKey, TValue>
     {
-        public override void Add(KeyValuePair<TKey, TValue> item)
+        public ClosedHashTable()
+        {
+
+        }
+
+        public override void Add(TKey key, TValue value)
         {
             throw new NotImplementedException();
         }
 
-        public override TValue Search(TKey key)
+        public override bool Remove(TKey key)
         {
             throw new NotImplementedException();
         }
 
-        public override bool Delete(TKey key)
+        public override bool TryGetValue(TKey key, out TValue value)
         {
             throw new NotImplementedException();
         }
