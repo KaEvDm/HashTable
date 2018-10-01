@@ -5,7 +5,7 @@ namespace HashTable
 {
     public abstract class HashTable<TKey, TValue>
     {
-        private int SecretHashCode = "KaEvDm".GetHashCode();
+        private readonly int SecretHashCode = "KaEvDm".GetHashCode();
 
         public int Size { get; protected set; }
         public int LoadFactor { get => Count/Size; }

@@ -31,9 +31,20 @@ namespace HashTable
 
             Assert.AreEqual(testTable[300], "three hundred");
 
-            var classHashTable = new OpenedHashTable<String, String>();
+            var newTestTable = new OpenedHashTable<String, String>();
 
-            classHashTable.Add(default(string), "dsfsdfsfds");
+            try { newTestTable.Add(default(string), "null string"); }
+            catch (ArgumentNullException e)
+            {
+                Console.WriteLine($"newTestTable.Add(default(string), \"null\"): {e.Message}");
+            }
+
+            try { testTable.Add(default(int), "null int"); }
+            catch (ArgumentNullException e)
+            {
+                Console.WriteLine($"testTable.Add(default(int), \"null\"): {e.Message}");
+            }
+
 
             Console.ReadKey();
         }
