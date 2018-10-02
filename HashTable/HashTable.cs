@@ -8,7 +8,7 @@ namespace HashTable
         private readonly int SecretHashCode = "KaEvDm".GetHashCode();
 
         public int Size { get; protected set; }
-        public int LoadFactor { get => Count/Size; }
+        public double LoadFactor { get => Count / (double)Size; }
         public virtual int Count { get; protected set; }
 
         public abstract void Add(TKey key, TValue value);

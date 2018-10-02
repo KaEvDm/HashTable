@@ -10,20 +10,14 @@ namespace HashTable
         private Dictionary<int, Dictionary<TKey, TValue>> chains;
         public override int Count => chains.Values.Select(chain => chain.Count).Sum();
 
-        private void CheckKey(TKey key)
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-        }
-        
         /// <summary>
         /// Инициализирует новый экземпляр класса <see cref="OpenedHashTable{TKey, TValue}"/>,
         /// который является пустым.
         /// </summary>
         public OpenedHashTable(int size = 256)
         {
-            chains = new Dictionary<int, Dictionary<TKey, TValue>>();
             Size = size;
+            chains = new Dictionary<int, Dictionary<TKey, TValue>>(size);
         }
 
         /// <summary>
@@ -53,9 +47,15 @@ namespace HashTable
                     throw new ArgumentException($"Хеш-таблица уже содержит элемент с ключом {key}." +
                         " Ключ должен быть уникален.", nameof(key));
                 }
-                else chains[hash].Add(key, value);
+                else
+                {
+                    chains[hash].Add(key, value);
+                }
             }
-            else chains.Add(hash, new Dictionary<TKey, TValue> { { key, value } });
+            else
+            {
+                chains.Add(hash, new Dictionary<TKey, TValue> { { key, value } });
+            }
         }
 
         /// <summary>
@@ -107,9 +107,20 @@ namespace HashTable
 
             var hash = GetHash(key);
 
-            if (!chains.ContainsKey(hash)) return false;
+            if (!chains.ContainsKey(hash))
+            {
+                return false;
+            }
 
             return chains[hash].Remove(key);
+        }
+
+        private void CheckKey(TKey key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
         }
     }
 }
