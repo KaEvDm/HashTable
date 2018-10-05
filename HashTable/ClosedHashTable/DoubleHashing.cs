@@ -18,7 +18,7 @@ namespace HashTable
 
         public int Step(int iteration, TKey key)
         {
-            return GetHash(key);
+            return iteration * GetHash(key);
         }
 
         private int GetHash(TKey key) => Math.Abs(((key.GetHashCode() ^ SecretHashCode) % (TableSize - 1))) + 1;

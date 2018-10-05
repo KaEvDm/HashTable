@@ -17,7 +17,7 @@ namespace HashTable
 
         public int Step(int iteration, TKey key)
         {
-            return IntervalBetweenProbes * iteration;
+            return iteration * IntervalBetweenProbes;
         }
 
         // Линейное пробирование: ячейки хеш-таблицы последовательно просматриваются с 

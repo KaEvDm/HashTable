@@ -29,7 +29,7 @@ namespace HashTable
                     }
                 case ProbingType.Quadratic:
                     {
-                        Size = (int)Math.Pow(2, 10);
+                        Size = (int)Math.Pow(2, 8);
                         hashProbing = new QuadraticProbing<TKey>();
                         break;
                     }
@@ -42,14 +42,12 @@ namespace HashTable
                         break;
                     }
             }
-
             cells = new Dictionary<int, KeyValuePair<TKey, TValue>>(Size);
         }
 
         public override void Add(TKey key, TValue value)
         {
             CheckKey(key);
-
             var hash = GetHash(key);
 
             if (LoadFactor > 0.5)
@@ -61,91 +59,95 @@ namespace HashTable
             {
                 for (int i = 0; i < Size; i++)
                 {
-                    var newHash = (hash + hashProbing.Step(i, key)) % Size;
+                    var nextHash = (hash + hashProbing.Step(i, key)) % Size;
 
-                    if (cells.ContainsKey(newHash))
+                    if (IsCellContainsKey(nextHash, key))
                     {
-                        //на случай, если ключи равны
-                        if (cells[newHash].Key.Equals(key))
-                        {
-                            throw new ArgumentException($"Хеш-таблица уже содержит элемент с ключом {key}." +
-                                " Ключ должен быть уникален.", nameof(key));
-                        }
+                        throw new ArgumentException($"Хеш-таблица уже содержит элемент с ключом {key}." +
+                            " Ключ должен быть уникален.", nameof(key));
                     }
                     else
                     {
-                        //ячейка пуста, заполняем её
-                        cells.Add(newHash, new KeyValuePair<TKey, TValue>(key, value));
+                        cells.Add(nextHash, new KeyValuePair<TKey, TValue>(key, value));
                         return;
                     }
                 }
             }
         }
 
-
         public override bool Remove(TKey key)
         {
             CheckKey(key);
-
             var hash = GetHash(key);
 
             for (int i = 0; i < Size; i++)
             {
-                var newHash = (hash + hashProbing.Step(i, key)) % Size;
+                var nextHash = (hash + hashProbing.Step(i, key)) % Size;
 
-                if (cells.ContainsKey(newHash))
+                if (IsCellContainsKey(nextHash, key))
                 {
-                    if (cells[newHash].Key.Equals(key))
-                    {
-                        cells.Remove(newHash);
-                        return true;
-                    }
+                    cells.Remove(nextHash);
+                    return true;
                 }
             }
-
             return false;
         }
 
         public override bool TryGetValue(TKey key, out TValue value)
         {
             CheckKey(key);
-
             var hash = GetHash(key);
 
             for (int i = 0; i < Size; i++)
             {
-                var newHash = (hash + hashProbing.Step(i, key)) % Size;
+                var nextHash = (hash + hashProbing.Step(i, key)) % Size;
 
-                if (cells.ContainsKey(newHash))
+                if (IsCellContainsKey(nextHash, key))
                 {
-                    if (cells[newHash].Key.Equals(key))
-                    {
-                        value = cells[newHash].Value;
-                        return true;
-                    }
+                    value = cells[nextHash].Value;
+                    return true;
                 }
             }
-
             value = default(TValue);
             return false;
         }
 
-        public void PrintTable()
+        private void IncreaseSize()
         {
-            Console.WriteLine($"++++++++++++++++++++++{Size}++++++++++++++++");
-            for (int i = 0; i < Size; i++)
-            {   
-                if (cells.ContainsKey(i))
-                {
-                    Console.WriteLine($"[{i}]({cells[i].Key})");
-                }
-                else
-                {
-                    Console.WriteLine($"[{i}]({00})");
-                }
+            GetNewSize();
 
+            var newCells = new Dictionary<int, KeyValuePair<TKey, TValue>>(Size);
+
+            foreach (var cell in cells)
+            {
+                var hash = cell.Key;
+                var key = cell.Value.Key;
+
+                var newHash = GetHash(key);
+
+                if (hash != newHash)
+                {
+                    for (int i = 0; i < Size; i++)
+                    {
+                        var stepHash = (newHash + hashProbing.Step(i, key)) % Size;
+
+                        if (newCells.ContainsKey(stepHash))
+                        {
+                            if (newCells[stepHash].Key.Equals(key))
+                            {
+                                throw new ArgumentException($"Хеш-таблица уже содержит элемент с ключом {key}." +
+                                    " Ключ должен быть уникален.", nameof(key));
+                            }
+                        }
+                        else
+                        {
+                            newCells.Add(stepHash, new KeyValuePair<TKey, TValue>(key, cell.Value.Value));
+                            break;
+                        }
+                    }
+                }
             }
-            Console.WriteLine($"++++++++++++++++++++++++{Size}++++++++++++++++");
+            cells = newCells;
         }
 
         private void GetNewSize()
@@ -161,7 +163,7 @@ namespace HashTable
                     }
                 case ProbingType.Quadratic:
                     {
-                        Size = (int)Math.Pow(2, Math.Log(Size, 2) * 2);
+                        Size = (int)Math.Pow(2, Math.Log(Size, 2) + 2);
                         break;
                     }
                 case ProbingType.DoubleHashing:
@@ -175,56 +177,15 @@ namespace HashTable
             }
         }
 
-        private void IncreaseSize()
-        {
-            GetNewSize();
-
-            var newCells = new Dictionary<int, KeyValuePair<TKey, TValue>>(Size);
-            Console.WriteLine($"=================={Size}===================");
-
-            foreach (var cell in cells)
-            {
-                var hash = cell.Key;
-                var key = cell.Value.Key;
-                Console.Write($"|[{hash}]({key})|");
-                var newHash = GetHash(key);
-
-                //если ячейка не на своём месте
-                if (hash != newHash)
-                {
-                    //добавляем элемент со смещением
-                    for (int i = 0; i < Size; i++)
-                    {
-                        var stepHash = (newHash + hashProbing.Step(i, key)) % Size;
-                        Console.Write($" -> [{stepHash}]");
-                        if (newCells.ContainsKey(stepHash))
-                        {
-                            Console.Write($"({newCells[stepHash].Key})");
-                            //на случай, если ключи равны
-                            if (newCells[stepHash].Key.Equals(key))
-                            {
-                                throw new ArgumentException($"Хеш-таблица уже содержит элемент с ключом {key}." +
-                                    " Ключ должен быть уникален.", nameof(key));
-                            }
-                        }
-                        else
-                        {
-                            //ячейка пуста, заполняем её
-                            newCells.Add(stepHash, new KeyValuePair<TKey, TValue>(key, cell.Value.Value));
-                            break;
-                        }
-                    }
-                }
-                Console.WriteLine();
-            }
-            cells = newCells;
-            Console.WriteLine($"=================={Size}===================");
-        }
-
         private void CheckKey(TKey key)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
+        }
+
+        private bool IsCellContainsKey(int hash, TKey key)
+        {
+            return cells.ContainsKey(hash) && cells[hash].Key.Equals(key);
         }
     }
 }
