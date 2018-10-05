@@ -15,7 +15,7 @@ namespace HashTable
         public abstract bool TryGetValue(TKey key, out TValue value);
         public abstract bool Remove(TKey key);
 
-        protected int GetHash(TKey key) => (key.GetHashCode() ^ SecretHashCode) % Size;
+        public int GetHash(TKey key) => Math.Abs((key.GetHashCode() ^ SecretHashCode) % Size);
 
         public TValue this[TKey key]
         {

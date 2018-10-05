@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace HashTable
 {
-    public interface IHashProbing<TKey>
+    public enum ProbingType
     {
-        int Step(int iteration, TKey key);
+        Linear,
+        Quadratic,
+        DoubleHashing
     }
 }

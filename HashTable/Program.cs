@@ -8,43 +8,41 @@ namespace HashTable
     {
         static void Main(string[] args)
         {
-            var testTable = new OpenedHashTable<int, string>();
+            var testTable = new ClosedHashTable<int, string>(ProbingType.Linear, 2);
 
-            testTable.Add(5, "five");
-            testTable.Add(300, "three hundred");
 
-            //Assert.AreEqual(testTable[5], "five");
-            //Assert.AreEqual(testTable[300], "three hundred");
-            //Assert.IsNull(testTable[10]);
+            testTable.Add(1, "1");
+            testTable.Add(256, "256");
+            testTable.Add(543, "543");
+            testTable.Add(798, "798");
+            testTable.Add(1029, "1029");
 
-            //Console.WriteLine(testTable[300]);
-            //Console.WriteLine(testTable[5]);
-            //Console.WriteLine(testTable[10]);
+            testTable.Add(2, "2");
+            testTable.Add(257, "257");
+            testTable.Add(512, "512");
+            testTable.Add(799, "799");
+            testTable.Add(1030, "1030");
 
-            //try { testTable.Add(5, "five"); }
-            //catch (ArgumentException e) { Console.WriteLine($"testTable.Add(5, \"five\"): {e.Message}"); }
+            testTable.Remove(798);
 
-            //testTable.Remove(300);
-            //Assert.IsNull(testTable[300]);
+            for (int i = 3; i < 300; i++)
+            {
+                if(i!= 256 && i!= 257)
+                testTable.Add(i, i.ToString());
+            }
 
-            //testTable.Add(300, "three hundred");
+            testTable.PrintTable();
 
-            //Assert.AreEqual(testTable[300], "three hundred");
+            for (int i = 3; i < 300; i++)
+            {
+                if (i != 256 && i != 257)
+                    testTable.Remove(i);
+            }
 
-            //var newTestTable = new OpenedHashTable<String, String>();
+            testTable.PrintTable();
 
-            //try { newTestTable.Add(default(string), "null string"); }
-            //catch (ArgumentNullException e)
-            //{
-            //    Console.WriteLine($"newTestTable.Add(default(string), \"null\"): {e.Message}");
-            //}
-
-            //try { testTable.Add(default(int), "null int"); }
-            //catch (ArgumentNullException e)
-            //{
-            //    Console.WriteLine($"testTable.Add(default(int), \"null\"): {e.Message}");
-            //}
-
+            Console.WriteLine(testTable[257]);
+            Console.WriteLine(testTable[798]);
 
             Console.ReadKey();
         }

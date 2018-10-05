@@ -4,49 +4,41 @@ using System.Linq;
 
 namespace HashTable
 {
-    //========================================================\\
-    // !!                                                  !! \\
-    // !!           Эксперементальная версия               !! \\
-    // !!                                                  !! \\
-    //========================================================\\
-
     // Метод открытой адресации(закрытое хеширование)
     public sealed class ClosedHashTable<TKey, TValue> : HashTable<TKey, TValue>
     {
         private Dictionary<int, KeyValuePair<TKey, TValue>> cells;
-        private readonly Func<int, int, TKey, int> probing;
+        private readonly ProbingType probingType;
+        private IHashProbing<TKey> hashProbing;
 
         public override int Count => cells.Count();
 
         public ClosedHashTable(ProbingType probingType, int k = 1)
         {
+            this.probingType = probingType;
+
             switch (probingType)
             {
                 case ProbingType.Linear:
                     {
-                        var hashProbing = new HashProbing<TKey>(k);
-
                         Size = MathTools.GetCoPrime(k, 256, 1024);
-                        if (Size == -1) throw new Exception("Я накосячил с простыми числами");
+                        if (Size == -1) throw new Exception("Невозможный размер таблицы");
 
-                        probing = hashProbing.LinearStep;
+                        hashProbing = new LinearProbing<TKey>(k);
                         break;
                     }
                 case ProbingType.Quadratic:
                     {
-                        var hashProbing = new HashProbing<TKey>();
                         Size = (int)Math.Pow(2, 10);
-                        probing = hashProbing.QuadraticStep;
+                        hashProbing = new QuadraticProbing<TKey>();
                         break;
                     }
                 case ProbingType.DoubleHashing:
                     {
-                        var hashProbing = new HashProbing<TKey>();
-
                         Size = MathTools.GetPrime(256, 1024);
-                        if (Size == -1) throw new Exception("Я накосячил с простыми числами");
+                        if (Size == -1) throw new Exception("Невозможный размер таблицы");
 
-                        probing = new HashProbing<TKey>().DoubleHashingStep;
+                        hashProbing = new DoubleHashing<TKey>(Size);
                         break;
                     }
             }
@@ -60,39 +52,34 @@ namespace HashTable
 
             var hash = GetHash(key);
 
-            //Нам нужно пробежать всю таблицу
-            //для разных последовательностей проб, это делается разным способом
-            for (int i = 0; i < Size / 2; i++)
+            if (LoadFactor > 0.5)
             {
-                var adress = (hash + probing(i, Size, key)) % Size;
-
-                //если в ячейке есть значение
-                if (cells.ContainsKey(adress))
+                IncreaseSize();
+                Add(key, value);
+            }
+            else
+            {
+                for (int i = 0; i < Size; i++)
                 {
-                    //на случай, если ключи равны
-                    if (cells[adress].Key.Equals(key))
+                    var newHash = (hash + hashProbing.Step(i, key)) % Size;
+
+                    if (cells.ContainsKey(newHash))
                     {
-                        throw new ArgumentException($"Хеш-таблица уже содержит элемент с ключом {key}." +
-                            " Ключ должен быть уникален.", nameof(key));
+                        //на случай, если ключи равны
+                        if (cells[newHash].Key.Equals(key))
+                        {
+                            throw new ArgumentException($"Хеш-таблица уже содержит элемент с ключом {key}." +
+                                " Ключ должен быть уникален.", nameof(key));
+                        }
                     }
-
-                    //делаем следующую пробу (смотрим некст ячейку)
-                    continue;
-                }
-                else
-                {
-                    //ячейка пуста, заполняем её
-                    cells.Add(hash, new KeyValuePair<TKey, TValue>(key, value));
-                    return;
+                    else
+                    {
+                        //ячейка пуста, заполняем её
+                        cells.Add(newHash, new KeyValuePair<TKey, TValue>(key, value));
+                        return;
+                    }
                 }
             }
-
-            //если мы здесь, значит мы пробежали половину таблицы и не нашли пустых ячеик
-            //значит нам нужно увеличить размер таблицы
-            IncreaseSize();
-
-            //В табилцу с измененным размером, нужно положить наше новое значение
-            Add(key, value);
         }
 
 
@@ -102,20 +89,21 @@ namespace HashTable
 
             var hash = GetHash(key);
 
-            if (cells.ContainsKey(hash))
+            for (int i = 0; i < Size; i++)
             {
-                if (cells[hash].Key.Equals(key))
+                var newHash = (hash + hashProbing.Step(i, key)) % Size;
+
+                if (cells.ContainsKey(newHash))
                 {
-                    cells.Remove(hash);
-                    // удаляем и смещаем все зависимые ячейки hash которых, 
-                    // не равен хешу от ключа который в них лежит
-                    //пока не дойдём до пустой
-                    ShiftCells(hash);
+                    if (cells[newHash].Key.Equals(key))
+                    {
+                        cells.Remove(newHash);
+                        return true;
+                    }
                 }
             }
-            else return false;
 
-            return true; // написано от балды чтобы компилятор не ругался на функцию
+            return false;
         }
 
         public override bool TryGetValue(TKey key, out TValue value)
@@ -123,67 +111,120 @@ namespace HashTable
             CheckKey(key);
 
             var hash = GetHash(key);
-            value = default(TValue);
-            var adress = 0;
-            int i = 0;
 
-            // Нам нужно пробежать всю таблицу определённым способом, 
-            // пока мы не встетим пустую ячейку  или не вернёмся в начальное место
-
-            while(adress != hash)
+            for (int i = 0; i < Size; i++)
             {
-                adress = (hash + probing(i, Size, key)) % Size;
+                var newHash = (hash + hashProbing.Step(i, key)) % Size;
 
-                //если в ячейке есть значение
-                if (cells.ContainsKey(adress))
+                if (cells.ContainsKey(newHash))
                 {
-                    //если ключи равны, это именно та ячейка которую мы ищем
-                    if (cells[adress].Key.Equals(key))
+                    if (cells[newHash].Key.Equals(key))
                     {
-                        value = cells[adress].Value;
+                        value = cells[newHash].Value;
                         return true;
                     }
-                    //если ячейка не пуста но содержит другой ключ, след итерация
-                    continue;
-                }
-                else
-                {
-                    //ячейка пуста
-                    return false;
                 }
             }
+
+            value = default(TValue);
             return false;
         }
 
-        private bool ShiftCells(int hash)
+        public void PrintTable()
         {
-            // на вход поступает хеш пустой ячейки,
-            // нужно проверить, не пытались ли в этот хэш положить другие значения
-            // находя их по probing
-            // и смещать одну за другой (возможно рекурсивно)
-            // пока не встретим пустую ячейку
+            Console.WriteLine($"++++++++++++++++++++++{Size}++++++++++++++++");
+            for (int i = 0; i < Size; i++)
+            {   
+                if (cells.ContainsKey(i))
+                {
+                    Console.WriteLine($"[{i}]({cells[i].Key})");
+                }
+                else
+                {
+                    Console.WriteLine($"[{i}]({00})");
+                }
 
-            return true;
+            }
+            Console.WriteLine($"++++++++++++++++++++++++{Size}++++++++++++++++");
         }
 
-        private bool IncreaseSize()
+        private void GetNewSize()
         {
-            // важно помнить, что при изменении размера таблицы,
-            // необходимо поменять расположение всех её ячеек
-            return true;
+            switch (probingType)
+            {
+                case ProbingType.Linear:
+                    {
+                        int k = (hashProbing as LinearProbing<TKey>).IntervalBetweenProbes;
+                        Size = MathTools.GetCoPrime(k, Size * 2, Size * Size);
+                        if (Size == -1) throw new Exception("Невозможный размер таблицы");
+                        break;
+                    }
+                case ProbingType.Quadratic:
+                    {
+                        Size = (int)Math.Pow(2, Math.Log(Size, 2) * 2);
+                        break;
+                    }
+                case ProbingType.DoubleHashing:
+                    {
+                        Size = MathTools.GetPrime(Size * 2, Size * Size);
+                        if (Size == -1) throw new Exception("Невозможный размер таблицы");
+
+                        hashProbing = new DoubleHashing<TKey>(Size);
+                        break;
+                    }
+            }
+        }
+
+        private void IncreaseSize()
+        {
+            GetNewSize();
+
+            var newCells = new Dictionary<int, KeyValuePair<TKey, TValue>>(Size);
+            Console.WriteLine($"=================={Size}===================");
+
+            foreach (var cell in cells)
+            {
+                var hash = cell.Key;
+                var key = cell.Value.Key;
+                Console.Write($"|[{hash}]({key})|");
+                var newHash = GetHash(key);
+
+                //если ячейка не на своём месте
+                if (hash != newHash)
+                {
+                    //добавляем элемент со смещением
+                    for (int i = 0; i < Size; i++)
+                    {
+                        var stepHash = (newHash + hashProbing.Step(i, key)) % Size;
+                        Console.Write($" -> [{stepHash}]");
+                        if (newCells.ContainsKey(stepHash))
+                        {
+                            Console.Write($"({newCells[stepHash].Key})");
+                            //на случай, если ключи равны
+                            if (newCells[stepHash].Key.Equals(key))
+                            {
+                                throw new ArgumentException($"Хеш-таблица уже содержит элемент с ключом {key}." +
+                                    " Ключ должен быть уникален.", nameof(key));
+                            }
+                        }
+                        else
+                        {
+                            //ячейка пуста, заполняем её
+                            newCells.Add(stepHash, new KeyValuePair<TKey, TValue>(key, cell.Value.Value));
+                            break;
+                        }
+                    }
+                }
+                Console.WriteLine();
+            }
+            cells = newCells;
+            Console.WriteLine($"=================={Size}===================");
         }
 
         private void CheckKey(TKey key)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
-        }
-
-        public enum ProbingType
-        {
-            Linear,
-            Quadratic,
-            DoubleHashing
         }
     }
 }
