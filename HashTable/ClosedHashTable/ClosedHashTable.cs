@@ -13,6 +13,19 @@ namespace HashTable
 
         public override int Count => cells.Count();
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="ClosedHashTable{TKey, TValue}"/>,
+        /// который является пустым.
+        /// </summary>
+        /// <param name="probingType">
+        /// Выбор типа пробирования (Линейное, Квадратичное, Двойное хеширование).
+        /// </param>
+        /// <param name="k">
+        /// Если выбранно Линейное пробирование, можно заать интервал между ячейками k.
+        /// </param>
+        /// <exception cref="System.Exception">
+        ///  Невозможно правильно задать размер таблицы.
+        /// </exception>
         public ClosedHashTable(ProbingType probingType, int k = 1)
         {
             this.probingType = probingType;
@@ -45,6 +58,23 @@ namespace HashTable
             cells = new Dictionary<int, KeyValuePair<TKey, TValue>>(Size);
         }
 
+        /// <summary>
+        /// Добавляет указанные ключ и значение в хеш-таблицу <see cref="ClosedHashTable{TKey, TValue}"/>.
+        /// </summary>
+        /// <param name="key">Ключ добавляемого элемента.</param>
+        /// <param name="value">
+        /// Добавляемое значение элемента.
+        /// Для ссылочных типов допускается значение null.
+        /// </param>
+        /// <exception cref="System.ArgumentException">
+        /// Элемент с таким ключом уже существует в <see cref="ClosedHashTable{TKey, TValue}"/>
+        /// </exception>
+        /// <exception cref="System.ArgumentNullException">
+        ///  Свойство key имеет значение null.
+        /// </exception>
+        /// <exception cref="System.Exception">
+        ///  Невозможно правильно задать размер таблицы.
+        /// </exception>
         public override void Add(TKey key, TValue value)
         {
             CheckKey(key);
@@ -75,6 +105,16 @@ namespace HashTable
             }
         }
 
+        /// <summary>
+        /// Удаляет элемент из хеш-таблицы <see cref="ClosedHashTable{TKey, TValue}"/> с указанным ключом.
+        /// </summary>
+        /// <param name="key">Ключ элемента, который требуется удалить.</param>
+        /// <returns>
+        /// Значение true, если элемент был найден и удален; в противном случае — значение false.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///  Свойство key имеет значение null.
+        /// </exception>
         public override bool Remove(TKey key)
         {
             CheckKey(key);
@@ -93,6 +133,21 @@ namespace HashTable
             return false;
         }
 
+        /// <summary>
+        /// Возвращает значение, связанное с заданным ключом.
+        /// </summary>
+        /// <param name="key">Ключ значения, которое необходимо получить.</param>
+        /// <param name="value">
+        /// Этот метод возвращает значение, связанное с указанным ключом, если он найден;
+        /// в противном случае — значение по умолчанию для типа параметра value.
+        /// </param>
+        /// <returns>
+        /// true, если <see cref="ClosedHashTable{TKey, TValue}"/> содержит элемент с указанным
+        /// ключом, в противном случае — false.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///  Свойство key имеет значение null.
+        /// </exception>
         public override bool TryGetValue(TKey key, out TValue value)
         {
             CheckKey(key);

@@ -15,8 +15,20 @@ namespace HashTable
         public abstract bool TryGetValue(TKey key, out TValue value);
         public abstract bool Remove(TKey key);
 
-        public int GetHash(TKey key) => Math.Abs((key.GetHashCode() ^ SecretHashCode) % Size);
+        protected int GetHash(TKey key) => Math.Abs((key.GetHashCode() ^ SecretHashCode) % Size);
 
+        /// <summary>
+        /// Возвращает или задает элемент по указанному индексу.
+        /// </summary>
+        /// <param name="key">
+        /// Ключ элемента, который требуется возвратить или задать.
+        /// </param>
+        /// <returns>
+        /// Значение, с указанным ключом. Если элемента нет в коллекции <see cref="default{TValue}"/>.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///  Свойство key имеет значение null.
+        /// </exception>
         public TValue this[TKey key]
         {
             get
